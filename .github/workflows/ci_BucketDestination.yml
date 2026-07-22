@@ -1,4 +1,4 @@
-name: DBA Dash CI with Bucket Source/Destination
+﻿name: DBA Hawk CI with Bucket Source/Destination
 
 on: 
     push:
@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build GUI
-        run: dotnet build DBADashGUI -o DBADashBuild\DBADashGUIOnly
+        run: dotnet build DBAHawkGUI -o DBADashBuild\DBADashGUIOnly
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
@@ -47,7 +47,7 @@ jobs:
         id: GetVersion 
         shell: powershell
         run: | 
-          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBADash.dll")
+          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBAHawk.dll")
           $version = [System.Reflection.Assembly]::LoadFrom($path).GetName().Version
           $version.ToString(3)
           Write-Output "BUILD_NUMBER=$($version.ToString(3))" >> $env:GITHUB_OUTPUT
@@ -202,12 +202,12 @@ jobs:
           Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
 
           Set-Location $InstallPath
-          ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
-          ./dbadashconfig -c "http://localhost:9000/dbadash-test" -a Add
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_FromBucket;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
-          ./dbadashconfig -a SetAWS --AWSAccessKey minioadmin --AWSSecretKey minioadmin
+          ./dbahawkconfig -a SetServiceName --ServiceName $ServiceName
+          ./dbahawkconfig -c "http://localhost:9000/dbadash-test" -a Add
+          ./dbahawkconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_FromBucket;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
+          ./dbahawkconfig -a SetAWS --AWSAccessKey minioadmin --AWSSecretKey minioadmin
           "Install Service"
-          ./DBADashService install --localsystem
+          ./DBAHawkService install --localsystem
 
           "Start Service"
           net start $ServiceName
@@ -235,13 +235,13 @@ jobs:
 
           Set-Location $InstallPath
           "Configure"
-          ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_Direct;Encrypt=True;TrustServerCertificate=True;" -a AddDestination
-          ./dbadashconfig -c "http://localhost:9000/dbadash-test" -a AddDestination
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
-          ./dbadashconfig -a SetAWS --AWSAccessKey minioadmin --AWSSecretKey minioadmin
+          ./dbahawkconfig -a SetServiceName --ServiceName $ServiceName
+          ./dbahawkconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_Direct;Encrypt=True;TrustServerCertificate=True;" -a AddDestination
+          ./dbahawkconfig -c "http://localhost:9000/dbadash-test" -a AddDestination
+          ./dbahawkconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
+          ./dbahawkconfig -a SetAWS --AWSAccessKey minioadmin --AWSSecretKey minioadmin
           "Install Service"
-          ./DBADashService install --localsystem
+          ./DBAHawkService install --localsystem
 
           "Start Service"
           net start $ServiceName

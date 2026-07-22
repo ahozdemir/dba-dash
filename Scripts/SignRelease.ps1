@@ -1,4 +1,4 @@
-<#
+﻿<#
   Script to sign executables in the latest draft release of a GitHub repository.
   Downloads release assets labeled with "-unsigned.zip", extracts them & signs files that match the specified pattern.
   Recompresses the signed files into a new zip and uploads it back to the draft release.  Removes the original unsigned assets if specified.
@@ -8,7 +8,7 @@
   Trimble signing tool requires authentication & works only on the corporate network.
 
   Usage:
-    .\DBADashSignRelease.ps1 -Folder "C:\temp" -Repo "trimble-oss/dba-dash" -SignTool "C:\Sign\SignFiles.exe" -SignPattern "DBADash*.exe" -RemoveUnsigned $true
+    .\DBADashSignRelease.ps1 -Folder "C:\temp" -Repo "trimble-oss/dba-dash" -SignTool "C:\Sign\SignFiles.exe" -SignPattern "DBAHawk*.exe" -RemoveUnsigned $true
 #>
 param (
     # Temp folder to use for signing.  A SignTemp sub folder will be created in this folder & a separate folder used for each run.  Folders are deleted after successful signing.
@@ -18,8 +18,8 @@ param (
     [string]$Repo="trimble-oss/dba-dash",
     # Path of the Trimble Sign Tool to use for signing the executables.
     [string]$SignTool = "C:\Sign\SignFiles.exe",
-    # Pattern to match the executables to sign.  Defaults to "DBADash*.exe" which matches all executables starting with "DBADash".
-    [string]$SignPattern = "DBADash*.exe",
+    # Pattern to match the executables to sign.  Defaults to "DBAHawk*.exe" which matches all executables starting with "DBAHawk".
+    [string]$SignPattern = "DBAHawk*.exe",
     # Remove the original unsigned assets after signing and uploading the new signed assets.
     [bool]$RemoveUnsigned = $true
 )

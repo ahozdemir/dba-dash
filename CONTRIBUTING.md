@@ -1,6 +1,6 @@
-# Contributing to DBA Dash
+﻿# Contributing to DBA Hawk
 
-You are considering contributing to DBA Dash - That's great, we need your help!  You can contribute to DBA Dash in a number of ways:
+You are considering contributing to DBA Hawk - That's great, we need your help!  You can contribute to DBA Hawk in a number of ways:
 
 - Fix bugs and implement new features
 - Improve the documentation
@@ -35,13 +35,13 @@ This document only provides some high level steps and assumes some knowledge of 
 
 ## What makes a good issue
 
-It's important to provide a clear explanation of the bug or the feature you would like to be implemented.  For bugs, please include error messages, the version of DBA Dash been used and any details about your environment that might be relevant. Is the bug intermittent?  What steps are needed to reproduce the issue? What version of SQL Server are you using?  Including screenshots can help a lot - It's easy to paste them into GitHub issues.
+It's important to provide a clear explanation of the bug or the feature you would like to be implemented.  For bugs, please include error messages, the version of DBA Hawk been used and any details about your environment that might be relevant. Is the bug intermittent?  What steps are needed to reproduce the issue? What version of SQL Server are you using?  Including screenshots can help a lot - It's easy to paste them into GitHub issues.
 
 For new features, provide a good explanation of the new feature and why it's important.  It might be useful to include drawings or some sort of visual aid in some cases.
 
 *Note: Please take care not to include any sensitive data in the issue.  Issues are public for anyone to read.*
 
-DBA Dash is an open source project and relies on code contributions from the community.  If you are willing to implement the changes for the issue yourself, please include this on the issue. It's OK to submit issues if you are not able to provide the code changes yourself.
+DBA Hawk is an open source project and relies on code contributions from the community.  If you are willing to implement the changes for the issue yourself, please include this on the issue. It's OK to submit issues if you are not able to provide the code changes yourself.
 
 [Create an issue](https://github.com/trimble-oss/dba-dash/issues)
 
@@ -50,7 +50,7 @@ DBA Dash is an open source project and relies on code contributions from the com
 This project is looking for code contributions from the community, but occasionally it might be necessary to reject a pull request.  There are a number of reasons why this might occur.  For example:
 
 - Does it break something?  
-- Does it work with all versions of SQL Server supported by DBA Dash? 
+- Does it work with all versions of SQL Server supported by DBA Hawk? 
 
 *Note: It's OK to use features supported by newer versions of SQL Server but it needs to be written in a way that doesn't fail with older versions.*
 

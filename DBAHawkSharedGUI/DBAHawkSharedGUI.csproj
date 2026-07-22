@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWpf>true</UseWpf>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SyntaxHighlighting\Json.xshd">
+      <SubType>Form</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxHighlighting\MarkDown.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\PowerShell.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\SQL-Dark.xshd" />
+    <EmbeddedResource Include="SyntaxHighlighting\SQL-Light.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AvalonEdit" />
+    <PackageReference Include="DiffPlex" />
+    <PackageReference Include="DiffPlex.Wpf" />
+    <PackageReference Include="Markdig" />
+    <PackageReference Include="Markdig.SyntaxHighlighting" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Web.WebView2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DBAHawk\DBAHawk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CodeEditor\CodeEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CodeEditor\CodeViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="DBConnection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Theme\ThemedTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="WebView2Wrapper.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

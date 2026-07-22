@@ -1,15 +1,15 @@
-SET QUOTED_IDENTIFIER ON
+﻿SET QUOTED_IDENTIFIER ON
 SET NOCOUNT ON
 /*********************************************************************
 	
-	DBA Dash  Critical Wait Alert
+	DBA Hawk  Critical Wait Alert
 	
 	This is an example alert that you can configure based on the 
-	data collected by DBA Dash.  Send an alert if any critical wait 
+	data collected by DBA Hawk.  Send an alert if any critical wait 
 	type exceeds the specified threshold.  e.g. RESOURCE_SEMAPHORE
 	would indicate that queries are waiting for memory to run.  
 	This code should run from a SQL Agent job in the context of 
-	the DBA Dash repository database.  DB mail needs to be configured
+	the DBA Hawk repository database.  DB mail needs to be configured
 	to receive alert notifications.  Run the agent job on a suitable 
 	schedule.
 
@@ -23,7 +23,7 @@ DECLARE @Threshold INT = 1000 /* Threshold in ms/sec that will trigger the alert
 DECLARE @SamplePeriodMins INT=5  /* The period we will evaluate in minutes */
 DECLARE @DelayBetweenAlertsMins INT = 10 /* Delay between responses to avoid sending a flood of notifications*/
 DECLARE @recipients VARCHAR(MAX)='your_email_here' /* Recipient email address */
-DECLARE @Subject VARCHAR(255)= 'DBA Dash Critical Wait Alert' /* Email subject */
+DECLARE @Subject VARCHAR(255)= 'DBA Hawk Critical Wait Alert' /* Email subject */
 /* Enter a tag name and value to alert for instances matching a specific tag.  Leave NULL to alert for all instances */
 DECLARE @TagName NVARCHAR(50) -- = 'Role' 
 DECLARE @TagValue NVARCHAR(50) -- = 'Production'
@@ -31,7 +31,7 @@ DECLARE @TagValue NVARCHAR(50) -- = 'Production'
 /*********************************************************************/
 
 /*	Create a table in tempdb to track when the alert was last generated.  (Change to use a regular DB if you prefer)
-	Used to implement a delay between alerts.  Can be shared with other DBA Dash alerts using AlertType 
+	Used to implement a delay between alerts.  Can be shared with other DBA Hawk alerts using AlertType 
 */
 DECLARE @AlertType VARCHAR(50)='CriticalWait'
 IF(OBJECT_ID('tempdb.dbo.DBADash_alerts') IS NULL)
@@ -102,7 +102,7 @@ OPTION(RECOMPILE)
 IF @@ROWCOUNT>0
 BEGIN
 	DECLARE @Msg NVARCHAR(MAX)
-	SET @Msg = 'DBA Dash Alert:
+	SET @Msg = 'DBA Hawk Alert:
 	Critical wait detected on the following instances:
 
 	'

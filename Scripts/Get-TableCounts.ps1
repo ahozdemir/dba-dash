@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Output a list of tables with count of rows in each table.
 .DESCRIPTION
@@ -8,7 +8,7 @@
 .PARAMETER Database
     Name of the database
 .EXAMPLE
-    ./Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBADashDB 
+    ./Get-TableCounts -ServerInstance "LOCALHOST" -Database "DBAHawkDB 
 #>
 Param(
     [Parameter(Mandatory=$true)]

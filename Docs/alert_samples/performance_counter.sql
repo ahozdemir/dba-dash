@@ -1,14 +1,14 @@
-SET QUOTED_IDENTIFIER ON
+﻿SET QUOTED_IDENTIFIER ON
 SET NOCOUNT ON
 /*********************************************************************
 	
-	DBA Dash Performance Counter Alert
+	DBA Hawk Performance Counter Alert
 	
 	This is an example alert that you can configure based on the 
-	data collected by DBA Dash.  Send an alert if a performance counter
+	data collected by DBA Hawk.  Send an alert if a performance counter
 	exceeds a specified threshold for the last 3 collections.
 	This code should run from a SQL Agent job in the context of 
-	the DBA Dash repository database.  DB mail needs to be configured
+	the DBA Hawk repository database.  DB mail needs to be configured
 	to receive alert notifications.  Run the agent job on a suitable 
 	schedule.
 
@@ -25,7 +25,7 @@ DECLARE @Thresholds TABLE(
 **********************************************************************/
 DECLARE @DelayBetweenAlertsMins INT = 10 /* Delay between responses to avoid sending a flood of notifications*/
 DECLARE @recipients VARCHAR(MAX)='your_email_here' /* Recipient email address */
-DECLARE @Subject VARCHAR(255)= 'DBA Dash Performance Counter Alert' /* Email subject */
+DECLARE @Subject VARCHAR(255)= 'DBA Hawk Performance Counter Alert' /* Email subject */
 /* Enter a tag name and value to alert for instances matching a specific tag.  Leave NULL to alert for all instances */
 DECLARE @TagName NVARCHAR(50) -- = 'Role' 
 DECLARE @TagValue NVARCHAR(50) -- = 'Production'
@@ -56,7 +56,7 @@ SELECT 'General Statistics','Temp Tables For Destruction',NULL,10000,NULL;
 /*********************************************************************/
 
 /*	Create a table in tempdb to track when the alert was last generated.  (Change to use a regular DB if you prefer)
-	Used to implement a delay between alerts.  Can be shared with other DBA Dash alerts using AlertType 
+	Used to implement a delay between alerts.  Can be shared with other DBA Hawk alerts using AlertType 
 */
 DECLARE @AlertType VARCHAR(50)='PerformanceCounterAlert'
 IF(OBJECT_ID('tempdb.dbo.DBADash_alerts') IS NULL)
@@ -171,7 +171,7 @@ HAVING COUNT(*)=3 -- Each of the last 3 collections exceeds threshold
 IF @@ROWCOUNT>0
 BEGIN
 	DECLARE @Msg NVARCHAR(MAX)
-	SET @Msg = 'DBA Dash Performance Counter Alert
+	SET @Msg = 'DBA Hawk Performance Counter Alert
 	Performance counter exceeded threshold for last 3 collections
 	'
 	SET @Msg += (

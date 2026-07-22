@@ -1,13 +1,13 @@
-/* Global Assembly Configuration.  
+﻿/* Global Assembly Configuration.  
  * Update application version & metadata here to affect all projects
  * Major/Minor in dacpac should be kept in sync - otherwise an upgrade warning will be prompted to the user.
 */
 using System.Reflection;
 
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Trimble, Inc")]
-[assembly: AssemblyProduct("DBA Dash")]
-[assembly: AssemblyCopyright("Copyright © 2022 Trimble, Inc.")]
+[assembly: AssemblyCompany("datacomware")]
+[assembly: AssemblyProduct("DBA Hawk")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 datacomware")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

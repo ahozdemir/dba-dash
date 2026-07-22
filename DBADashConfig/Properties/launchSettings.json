@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "DBADashConfig": {
-      "commandName": "Project",
-      "commandLineArgs": "-a SetAWS --AWSProfile \"Test\""
-    }
-  }
-}

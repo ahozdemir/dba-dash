@@ -1,0 +1,193 @@
+﻿using DBAHawkGUI.Theme;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace DBAHawkGUI
+{
+    internal static class DBADashUser
+    {
+        public const float DefaultChartAxisLabelFontSize = 14f;
+        public const float DefaultChartAxisNameFontSize = 14f;
+
+        public static readonly int SystemUserID = -1;
+
+        public static int UserID { get; private set; }
+
+        public static bool HasManageGlobalViews;
+
+        public static bool AllowMessaging;
+
+        public static bool AllowPlanForcing;
+
+        public static bool IsAdmin;
+
+        public static bool CustomTools;
+
+        public static bool CommunityScripts;
+
+        public static bool AllowJobExecution;
+
+        public static TimeZoneInfo UserTimeZone = TimeZoneInfo.Local;
+
+        public static HashSet<string> Roles;
+
+        public static string DateTimeFormatString
+        {
+            get => string.IsNullOrEmpty(Properties.Settings.Default.DateTimeFormatString) ? "g" : Properties.Settings.Default.DateTimeFormatString;
+            set
+            {
+                Properties.Settings.Default.DateTimeFormatString = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static string TimeFormatString
+        {
+            get => string.IsNullOrEmpty(Properties.Settings.Default.TimeFormatString) ? "t" : Properties.Settings.Default.TimeFormatString;
+            set
+            {
+                Properties.Settings.Default.TimeFormatString = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static float ChartAxisLabelFontSize
+        {
+            get
+            {
+                var value = Properties.Settings.Default.ChartAxisLabelFontSize;
+                return value < 0 ? DefaultChartAxisLabelFontSize : value;
+            }
+            set
+            {
+                Properties.Settings.Default.ChartAxisLabelFontSize = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static float ChartAxisNameFontSize
+        {
+            get
+            {
+                var value = Properties.Settings.Default.ChartAxisNameFontSize;
+                return value < 0 ? DefaultChartAxisNameFontSize : value;
+            }
+            set
+            {
+                Properties.Settings.Default.ChartAxisNameFontSize = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static void Update()
+        {
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("DBAHawk.User_Upd", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            cmd.Parameters.AddWithValue("UserID", UserID);
+            if (DateHelper.AppTimeZone == TimeZoneInfo.Local)
+            {
+                cmd.Parameters.AddWithValue("TimeZone", DBNull.Value);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue("TimeZone", UserTimeZone.Id);
+            }
+
+            cmd.Parameters.AddWithValue("Theme", SelectedTheme.ThemeIdentifier.ToString());
+            cmd.ExecuteNonQuery();
+
+            // Persist the user's theme locally so we can apply it on next startup
+            try
+            {
+                Properties.Settings.Default.Theme = SelectedTheme.ThemeIdentifier.ToString();
+                Properties.Settings.Default.Save();
+            }
+            catch
+            {
+                // ignore settings failures
+            }
+        }
+
+        public static async Task GetUserAsync(CancellationToken token)
+        {
+            await using var cn = new SqlConnection(Common.ConnectionString);
+            await using var cmd = new SqlCommand("DBAHawk.User_Get", cn) { CommandType = CommandType.StoredProcedure };
+            await cn.OpenAsync(token);
+            cmd.Parameters.AddWithValue("UserName", Environment.UserName);
+            var pUserID = new SqlParameter("UserID", SqlDbType.Int) { Direction = ParameterDirection.Output };
+            var pManageGlobalViews = new SqlParameter("ManageGlobalViews", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var pAllowMessaging = new SqlParameter("AllowMessaging", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var pAllowPlanForcing = new SqlParameter("AllowPlanForcing", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var pAllowJobExecution = new SqlParameter("AllowJobExecution", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var pTZ = new SqlParameter("TimeZone", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
+            var pTheme = new SqlParameter("Theme", SqlDbType.VarChar, 50) { Direction = ParameterDirection.Output };
+            var pIsAdmin = new SqlParameter("IsAdmin", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            cmd.Parameters.AddRange(new[] { pUserID, pManageGlobalViews, pTZ, pTheme, pAllowMessaging, pAllowPlanForcing, pIsAdmin, pAllowJobExecution });
+            await using var rdr = await cmd.ExecuteReaderAsync(token);
+            Roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            while (await rdr.ReadAsync(token))
+            {
+                Roles.Add(rdr["name"].ToString());
+            }
+
+            rdr.Close();
+            var id = Convert.ToInt32(pUserID.Value);
+            if (id > 0)
+            {
+                UserID = (int)pUserID.Value;
+                HasManageGlobalViews = (bool)pManageGlobalViews.Value;
+                AllowMessaging = (bool)pAllowMessaging.Value;
+                AllowPlanForcing = (bool)pAllowPlanForcing.Value && AllowMessaging;
+                AllowJobExecution = (bool)pAllowJobExecution.Value && AllowMessaging;
+                IsAdmin = (bool)pIsAdmin.Value;
+                CommunityScripts = (IsInRole("CommunityScripts") && AllowMessaging) || IsAdmin;
+                CustomTools = (IsInRole("CustomTools") && AllowMessaging) || IsAdmin;
+                if (pTZ.Value != DBNull.Value)
+                {
+                    var tzID = (string)pTZ.Value;
+                    try
+                    {
+                        UserTimeZone = TimeZoneInfo.FindSystemTimeZoneById(tzID);
+                        DateHelper.AppTimeZone = UserTimeZone;
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Time zone not found " + tzID, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        DateHelper.AppTimeZone = TimeZoneInfo.Local;
+                        UserTimeZone = TimeZoneInfo.Local;
+                    }
+                }
+                var themeType = Enum.TryParse(pTheme.Value as string, out ThemeType result) ? result : ThemeType.Default;
+
+                SetTheme(themeType);
+            }
+            else
+            {
+                throw new Exception("Invalid UserID");
+            }
+        }
+
+        public static bool IsInRole(string role) => Roles.Contains(role);
+
+        public static void SetTheme(ThemeType type)
+        {
+            SelectedTheme = type switch
+            {
+                ThemeType.Default => new BaseTheme(),
+                ThemeType.Dark => new DarkTheme(),
+                ThemeType.White => new WhiteTheme(),
+                _ => SelectedTheme
+            };
+        }
+
+        public static BaseTheme SelectedTheme { get => ThemeExtensions.CurrentTheme; set => ThemeExtensions.CurrentTheme = value; }
+
+        public static bool IsDarkTheme => SelectedTheme.ThemeIdentifier == ThemeType.Dark;
+    }
+}

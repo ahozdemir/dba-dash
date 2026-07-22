@@ -1,6 +1,6 @@
-# DBA Dash AI Assistant
+﻿# DBA Hawk AI Assistant
 
-The AI Assistant analyses your DBA Dash repository data and answers natural-language questions about alerts, performance, waits, backups, blocking, slow queries, and more.
+The AI Assistant analyses your DBA Hawk repository data and answers natural-language questions about alerts, performance, waits, backups, blocking, slow queries, and more.
 
 ## How it works
 
@@ -8,8 +8,8 @@ Two components work together:
 
 | Component | Role |
 |---|---|
-| **DBADashAI** (`DBADashAI.dll`) | ASP.NET Core web service. Runs SQL tools against the repository DB, optionally calls an LLM to summarise findings, and exposes `/api/ai/*` endpoints. |
-| **DBADash GUI** | Discovers the AI service, calls the API, and renders the response in the AI Assistant tab. |
+| **DBAHawkAI** (`DBAHawkAI.dll`) | ASP.NET Core web service. Runs SQL tools against the repository DB, optionally calls an LLM to summarise findings, and exposes `/api/ai/*` endpoints. |
+| **DBAHawk GUI** | Discovers the AI service, calls the API, and renders the response in the AI Assistant tab. |
 
 ---
 
@@ -17,7 +17,7 @@ Two components work together:
 
 ### Local mode (default — recommended for getting started)
 
-Run `DBADashAI` on the same machine as the GUI. It binds to `localhost` only and requires no authentication — the loopback interface is the security boundary.
+Run `DBAHawkAI` on the same machine as the GUI. It binds to `localhost` only and requires no authentication — the loopback interface is the security boundary.
 
 - No certificates required
 - No API key required
@@ -37,7 +37,7 @@ Run `DBADashAI` on the same machine as the GUI. It binds to `localhost` only and
 
 ### Shared/repository mode
 
-Deploy `DBADashAI` on a central server accessible to all GUI clients. Set `Registration:ServiceUrl` to the URL that clients will connect to. The service binds to all interfaces, registers that URL in the repository database, and enforces API key authentication.
+Deploy `DBAHawkAI` on a central server accessible to all GUI clients. Set `Registration:ServiceUrl` to the URL that clients will connect to. The service binds to all interfaces, registers that URL in the repository database, and enforces API key authentication.
 
 **`appsettings.json`:**
 
@@ -60,21 +60,21 @@ GUI clients discover the URL and API key automatically from the repository datab
 
 ## Configuration reference (`appsettings.json`)
 
-All AI service configuration lives in `appsettings.json` in the `DBADashAI` folder. `ServiceConfig.json` is not used by the AI service except to inherit the repository connection string when they are co-located.
+All AI service configuration lives in `appsettings.json` in the `DBAHawkAI` folder. `ServiceConfig.json` is not used by the AI service except to inherit the repository connection string when they are co-located.
 
 ### Repository connection string
 
-Required. Tells the AI service which DBA Dash database to query.
+Required. Tells the AI service which DBA Hawk database to query.
 
 ```json
 {
   "ConnectionStrings": {
-    "Repository": "Server=sql-server;Database=DBADashDB;Integrated Security=true;Encrypt=true;"
+    "Repository": "Server=sql-server;Database=DBAHawkDB;Integrated Security=true;Encrypt=true;"
   }
 }
 ```
 
-If `DBADashAI` is deployed in the same folder as the collection service, this is inherited automatically from `ServiceConfig.json` and does not need to be set here.
+If `DBAHawkAI` is deployed in the same folder as the collection service, this is inherited automatically from `ServiceConfig.json` and does not need to be set here.
 
 ### AI provider
 
@@ -171,7 +171,7 @@ Only applies in shared/repository mode (`ServiceUrl` set). In local mode, auth i
     "LogLevel": {
       "Default": "Information",
       "Microsoft.AspNetCore": "Warning",
-      "DBADashAI": "Information"
+      "DBAHawkAI": "Information"
     }
   }
 }
@@ -194,16 +194,16 @@ Store secrets in Key Vault instead of `appsettings.json`. Use `--` to represent 
 
 ## Installing as a Windows service
 
-Use the **AI Service** tab in the DBADashServiceConfig tool, or run `sc.exe` manually:
+Use the **AI Service** tab in the DBAHawkServiceConfig tool, or run `sc.exe` manually:
 
 ```powershell
-sc.exe create DBADashAI `
-    binPath="\"C:\Program Files\dotnet\dotnet.exe\" \"C:\DBADash\DBADashAI\DBADashAI.dll\"" `
+sc.exe create DBAHawkAI `
+    binPath="\"C:\Program Files\dotnet\dotnet.exe\" \"C:\DBAHawk\DBAHawkAI\DBAHawkAI.dll\"" `
     start= auto
-sc.exe start DBADashAI
+sc.exe start DBAHawkAI
 ```
 
-Configure the service by editing `appsettings.json` in the `DBADashAI` folder before or after installation. Restart the service to apply changes.
+Configure the service by editing `appsettings.json` in the `DBAHawkAI` folder before or after installation. Restart the service to apply changes.
 
 ---
 

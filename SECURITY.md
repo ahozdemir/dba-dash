@@ -1,4 +1,4 @@
-# Security Policy
+﻿# Security Policy
 
 ## Reporting a Vulnerability
 
@@ -16,6 +16,6 @@ When the security team receives a security bug report, they will assign it to a 
 - Audit code to find any potential similar problems.
 - Prepare fixes for all releases still under maintenance. These fixes will be released as fast as possible.
 
-## DBA Dash security configuration
+## DBA Hawk security configuration
 
-For help configuring security in DBA Dash, [see here](https://dbadash.com/docs/help/security/)
+For help configuring security in DBA Hawk, [see here](https://dbadash.com/docs/help/security/)

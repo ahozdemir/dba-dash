@@ -1,4 +1,4 @@
-name: DBA Dash CI with Minimal Permissions
+﻿name: DBA Hawk CI with Minimal Permissions
 
 on: 
     push:
@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build GUI
-        run: dotnet build DBADashGUI -o DBADashBuild\DBADashGUIOnly
+        run: dotnet build DBAHawkGUI -o DBADashBuild\DBADashGUIOnly
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
@@ -47,7 +47,7 @@ jobs:
         id: GetVersion 
         shell: powershell
         run: | 
-          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBADash.dll")
+          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBAHawk.dll")
           $version = [System.Reflection.Assembly]::LoadFrom($path).GetName().Version
           $version.ToString(3)
           Write-Output "BUILD_NUMBER=$($version.ToString(3))" >> $env:GITHUB_OUTPUT
@@ -83,26 +83,26 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "CREATE DATABASE TestIdentity"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d TestIdentity -Q "CREATE TABLE dbo.IdentityTest(ID TINYINT IDENTITY(1,1));DECLARE @i INT=1; WHILE @i <250 BEGIN INSERT INTO dbo.IdentityTest  DEFAULT VALUES; SET @i+=1; END"
 
-      - name: Add SQL Login for DBA Dash service with minimal permissions
+      - name: Add SQL Login for DBA Hawk service with minimal permissions
         run: | 
-          sqlcmd -S localhost -U sa -P dbatools.I0 -d master -Q "CREATE LOGIN [DBADashService] WITH PASSWORD=N'Use_A_Str0ng_Passw0rd', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
-          GRANT CREATE ANY DATABASE TO [DBADashService] /* Only required to allow service account to create repository database */
-          GRANT VIEW SERVER STATE TO [DBADashService]
-          GRANT VIEW ANY DATABASE TO [DBADashService]
-          GRANT CONNECT ANY DATABASE TO [DBADashService]
-          GRANT VIEW ANY DEFINITION TO [DBADashService]
-          GRANT ALTER ANY EVENT SESSION TO [DBADashService] /* Required if you want to use slow query capture */
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d master -Q "CREATE LOGIN [DBAHawkService] WITH PASSWORD=N'Use_A_Str0ng_Passw0rd', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+          GRANT CREATE ANY DATABASE TO [DBAHawkService] /* Only required to allow service account to create repository database */
+          GRANT VIEW SERVER STATE TO [DBAHawkService]
+          GRANT VIEW ANY DATABASE TO [DBAHawkService]
+          GRANT CONNECT ANY DATABASE TO [DBAHawkService]
+          GRANT VIEW ANY DEFINITION TO [DBAHawkService]
+          GRANT ALTER ANY EVENT SESSION TO [DBAHawkService] /* Required if you want to use slow query capture */
           USE [msdb]
           IF NOT EXISTS(SELECT * 
                 FROM msdb.sys.database_principals
-                WHERE name = 'DBADashService')
+                WHERE name = 'DBAHawkService')
           BEGIN
-            CREATE USER [DBADashService] FOR LOGIN [DBADashService]
+            CREATE USER [DBAHawkService] FOR LOGIN [DBAHawkService]
           END
-          ALTER ROLE [db_datareader] ADD MEMBER [DBADashService]
-          ALTER ROLE [SQLAgentReaderRole] ADD MEMBER [DBADashService]"
+          ALTER ROLE [db_datareader] ADD MEMBER [DBAHawkService]
+          ALTER ROLE [SQLAgentReaderRole] ADD MEMBER [DBAHawkService]"
 
-      - name: Configure & Install DBA Dash as Service
+      - name: Configure & Install DBA Hawk as Service
         shell: powershell
         run: | 
           $ErrorActionPreference = "Stop" 
@@ -112,12 +112,12 @@ jobs:
           Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
           Set-Location $InstallPath
           "Configure"
-          ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
-          ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*" --NoWMI
+          ./dbahawkconfig -c "Data Source=localhost;UID=DBAHawkService;pwd=Use_A_Str0ng_Passw0rd;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
+          ./dbahawkconfig -c "Data Source=localhost;UID=DBAHawkService;pwd=Use_A_Str0ng_Passw0rd;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*" --NoWMI
           "Install Service"
-          ./DBADashService install --localservice
+          ./DBAHawkService install --localservice
           "Start Service"
-          net start DBADashService
+          net start DBAHawkService
           "Wait 60 sec"
           Start-Sleep -s 60
 
@@ -135,7 +135,7 @@ jobs:
           Start-Sleep -s 300
       - name: Stop services
         run: |
-          net stop DBADashService
+          net stop DBAHawkService
       - name: Output CollectionErrorLog
         shell: powershell
         run: | 

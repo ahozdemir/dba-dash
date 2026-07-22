@@ -1,0 +1,22 @@
+﻿using DBAHawkGUI.Performance;
+using static DBAHawkGUI.Performance.IMetric;
+
+namespace DBAHawkGUI
+{
+
+    /// <summary>
+    /// Used by Waits to store the state of the user control for serialization
+    /// </summary>
+    public class WaitMetric : IMetric
+    {
+        public MetricTypes MetricType => MetricTypes.Waits;
+
+        public string WaitType { get; set; }
+        public bool CriticalWaitsOnly { get; set; }
+
+        public IMetricChart GetChart()
+        {
+            return new Waits() { Metric = this };
+        }
+    }
+}

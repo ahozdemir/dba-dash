@@ -1,4 +1,4 @@
-name: DBA Dash CI
+﻿name: DBA Hawk CI
 
 on: 
     push:
@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build GUI
-        run: dotnet build DBADashGUI -o DBADashBuild\DBADashGUIOnly
+        run: dotnet build DBAHawkGUI -o DBADashBuild\DBADashGUIOnly
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
@@ -44,13 +44,13 @@ jobs:
         run: msbuild dbadashdb -property:Configuration=CLI
 
       - name: Test
-        run: dotnet test DBADash.Test/DBADash.Test.csproj --verbosity normal
+        run: dotnet test DBAHawk.Test/DBAHawk.Test.csproj --verbosity normal
 
       - name: Get Version
         id: GetVersion 
         shell: powershell
         run: | 
-          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBADash.dll")
+          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBAHawk.dll")
           $version = [System.Reflection.Assembly]::LoadFrom($path).GetName().Version
           $version.ToString(3)
           Write-Output "BUILD_NUMBER=$($version.ToString(3))" >> $env:GITHUB_OUTPUT
@@ -86,7 +86,7 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "CREATE DATABASE TestIdentity"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d TestIdentity -Q "CREATE TABLE dbo.IdentityTest(ID TINYINT IDENTITY(1,1));DECLARE @i INT=1; WHILE @i <250 BEGIN INSERT INTO dbo.IdentityTest  DEFAULT VALUES; SET @i+=1; END"
 
-      - name: Configure & Install DBA Dash as Service
+      - name: Configure & Install DBA Hawk as Service
         shell: powershell
         run: | 
           $ErrorActionPreference = "Stop" 
@@ -96,14 +96,14 @@ jobs:
           Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
           Set-Location $InstallPath
           "Configure"
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
+          ./dbahawkconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
+          ./dbahawkconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
           "Enable OS-level (perfmon) counter collection"
-          ./dbadashconfig -a SetPerfmonCounters --PerfmonDefaults
+          ./dbahawkconfig -a SetPerfmonCounters --PerfmonDefaults
           "Install Service"
-          ./DBADashService install --localsystem
+          ./DBAHawkService install --localsystem
           "Start Service"
-          net start DBADashService
+          net start DBAHawkService
           "Wait 60 sec"
           Start-Sleep -s 60
 
@@ -121,7 +121,7 @@ jobs:
           Start-Sleep -s 300
       - name: Stop services
         run: |
-          net stop DBADashService
+          net stop DBAHawkService
       - name: Output CollectionErrorLog
         shell: powershell
         run: | 

@@ -1,0 +1,2 @@
+﻿CREATE SCHEMA DBAHawk
+    AUTHORIZATION [dbo];

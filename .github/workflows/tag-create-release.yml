@@ -1,4 +1,4 @@
-# Run workflow to create a release+tag based on version of app set in GlobalAssemblyInfo.cs
+﻿# Run workflow to create a release+tag based on version of app set in GlobalAssemblyInfo.cs
 name: Tag and Create Release
 
 on: workflow_dispatch
@@ -32,7 +32,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build GUI
-        run: dotnet build DBADashGUI -o DBADashBuild\DBADashGUIOnly
+        run: dotnet build DBAHawkGUI -o DBADashBuild\DBADashGUIOnly
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v3
@@ -44,7 +44,7 @@ jobs:
         id: GetVersion 
         shell: powershell
         run: | 
-          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBADash.dll")
+          $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBAHawk.dll")
           $version = [System.Reflection.Assembly]::LoadFrom($path).GetName().Version
           $version.ToString(3)
           Write-Output "BUILD_NUMBER=$($version.ToString(3))" >> $env:GITHUB_OUTPUT

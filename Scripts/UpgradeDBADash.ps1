@@ -1,6 +1,6 @@
-<#
+﻿<#
 .SYNOPSIS
-    Upgrade to the latest version of DBA Dash
+    Upgrade to the latest version of DBA Hawk
 .DESCRIPTION
     Check the current version against the latest release in github.
     Download the new version if available.  (Detecting if GUI only or full package is required)
@@ -23,7 +23,7 @@
 .PARAMETER NonInteractive
     Run without any interactive prompts. Errors (e.g. failed .NET version check) will throw immediately
     rather than asking the user whether to proceed. Intended for use when the script is invoked
-    from the DBA Dash service for automated/scheduled upgrades.
+    from the DBA Hawk service for automated/scheduled upgrades.
 .EXAMPLE
     ./UpgradeDBADash -Clean
 .EXAMPLE
@@ -71,10 +71,10 @@ function CheckDotNetVersion([System.Version]$AppVersion){
 
     if (!$VersionCheck){
         if($MinVersion.Major -eq 10){
-            Write-Warning ("The version of the .NET runtime appears to be out of date (Min Version: $MinVersion).`nDBA Dash $DotNet10AppVersion and later require the .NET 10 runtime. Please download the latest .NET 10 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/10.0`n`nVersions detected:`n" + $RuntimeVersions)
+            Write-Warning ("The version of the .NET runtime appears to be out of date (Min Version: $MinVersion).`nDBA Hawk $DotNet10AppVersion and later require the .NET 10 runtime. Please download the latest .NET 10 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/10.0`n`nVersions detected:`n" + $RuntimeVersions)
         }
         elseif($MinVersion.Major -eq 8){
-            Write-Warning ("The version of the .NET runtime appears to be out of date (Min Version: $MinVersion).`nDBA Dash $DotNet8AppVersion and later require the .NET 8 runtime. Please download the latest .NET 8 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/8.0`n`nVersions detected:`n" + $RuntimeVersions)
+            Write-Warning ("The version of the .NET runtime appears to be out of date (Min Version: $MinVersion).`nDBA Hawk $DotNet8AppVersion and later require the .NET 8 runtime. Please download the latest .NET 8 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/8.0`n`nVersions detected:`n" + $RuntimeVersions)
         }
         else{
             Write-Warning ("The version of the .NET runtime appears to be out of date (Min Version: $MinVersion).  Please download the latest .NET 6 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/6.0`n`nVersions detected:`n" + $RuntimeVersions)
@@ -111,13 +111,13 @@ function ExpandWithRetry([string]$ZipFile,[int]$RetryCount,[int]$WaitBetweenRetr
 
 $ErrorActionPreference = "Stop"
 $ProgressPreference = 'SilentlyContinue' # Improves performance of Invoke-WebRequest. #1233
-$upgradeFile = "DBADash.Upgrade"
+$upgradeFile = "DBAHawk.Upgrade"
 
 # Set security protocol to avoid 'Could not create SSL/TLS secure channel' error.
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# Check if current folder looks like the DBA Dash installation directoy.
-if (!(Test-Path -Path "DBADash.dll")){
+# Check if current folder looks like the DBA Hawk installation directoy.
+if (!(Test-Path -Path "DBAHawk.dll")){
     throw "Invalid Folder"
     return
  }
@@ -139,11 +139,11 @@ else{
 $newVersion = [System.Version]::Parse($Tag + ".0" * (4-($Tag.Split(".")).Count))
 
 # Get existing version
-$path = [System.IO.Path]::Combine((Get-Location),"DBADash.dll")
+$path = [System.IO.Path]::Combine((Get-Location),"DBAHawk.dll")
 $existingVersion=[System.Version](Get-Item $path).VersionInfo.ProductVersion
 
-$servicePath = [System.IO.Path]::Combine((Get-Location),"DBADashService.exe")
-$aiServicePath = [System.IO.Path]::Combine((Get-Location),"DBADashAI.dll")
+$servicePath = [System.IO.Path]::Combine((Get-Location),"DBAHawkService.exe")
+$aiServicePath = [System.IO.Path]::Combine((Get-Location),"DBAHawkAI.dll")
 
 $serviceName = (Get-CimInstance -ClassName Win32_Service | Where-Object { $_.PathName -ilike "*$servicePath*" } | Select-Object -First 1 -ExpandProperty Name)
 $aiServiceName = (Get-CimInstance -ClassName Win32_Service | Where-Object { $_.PathName -ilike "*$aiServicePath*" } | Select-Object -First 1 -ExpandProperty Name)
@@ -233,13 +233,13 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
         Write-Host "Stopping Service: $serviceName"
         Stop-Service -Name $serviceName -ErrorAction Stop
     }
-    # Stop DBADashAI service if running
+    # Stop DBAHawkAI service if running
     $aiServiceWasRunning = $false
     if($aiServiceName -ne $null){
         $aiServiceStatus = (Get-Service -Name $aiServiceName -ErrorAction Ignore).Status
         if($aiServiceStatus -eq 'Running'){
             $aiServiceWasRunning = $true
-            Write-Host "Stopping DBADashAI Service: $aiServiceName"
+            Write-Host "Stopping DBAHawkAI Service: $aiServiceName"
             Stop-Service -Name $aiServiceName -ErrorAction Stop
         }
     }
@@ -247,11 +247,11 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     # Append a separator before the wildcard so paths like C:\DBA\ don't match C:\DBA2\...
     Write-Host "Stop processes"
     $installDirPrefix = $installDir.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar + "*"
-    Get-Process -Name DBADash -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
+    Get-Process -Name DBAHawk -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
     Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
-    Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
+    Get-Process -Name DBAHawkConfig -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
     # Service should already be stopped but this will ensure the process isn't running.
-    Get-Process -Name DBADashService -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
+    Get-Process -Name DBAHawkService -ErrorAction Ignore | Where-Object { $_.Path -like $installDirPrefix } | Stop-Process -Force
 
     # Wait for file locks to be released
     Start-Sleep -Seconds 2
@@ -271,15 +271,15 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
         Write-Host "Starting Service. This can take some time while the repository database is upgraded..."
         Start-Service $serviceName
     }
-    # Start DBADashAI service if it was running before upgrade
+    # Start DBAHawkAI service if it was running before upgrade
     if($aiServiceWasRunning){
-        Write-Host "Starting DBADashAI Service: $aiServiceName"
+        Write-Host "Starting DBAHawkAI Service: $aiServiceName"
         Start-Service $aiServiceName
     }
     # Option to start GUI after upgrade
     if($StartGUI){
         Write-Host "Start GUI"
-        Start-Process .\DBADash.exe
+        Start-Process .\DBAHawk.exe
     }
     # Option to start config tool after upgrade
     if($StartConfig){
@@ -288,9 +288,9 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     }
 
     Write-Host "Remove installation files"
-    Get-ChildItem -Path "." -Filter "DBADash*.zip" | Remove-Item -Force
+    Get-ChildItem -Path "." -Filter "DBAHawk*.zip" | Remove-Item -Force
     Write-Host "Upgrade Completed" -ForegroundColor DarkGreen
 }
 else{
-    Write-Host "DBA Dash version is up to date." -ForegroundColor DarkGreen
+    Write-Host "DBA Hawk version is up to date." -ForegroundColor DarkGreen
 }

@@ -1,0 +1,8 @@
+﻿{
+  "profiles": {
+    "DBAHawkConfig": {
+      "commandName": "Project",
+      "commandLineArgs": "-a SetAWS --AWSProfile \"Test\""
+    }
+  }
+}

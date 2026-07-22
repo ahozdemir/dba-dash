@@ -1,16 +1,16 @@
-<#
+﻿<#
 .SYNOPSIS
-    Get the content of the files in the DBA Dash Log folder.
+    Get the content of the files in the DBA Hawk Log folder.
 .DESCRIPTION
     Output the contents of the log files.  Option to throw an error if files contain error log entries.  Script created for use in GitHub workflow.
 .PARAMETER LogPath
-    DBA Dash Log folder path
+    DBA Hawk Log folder path
 .PARAMETER ThrowError
     Option to throw an error if files contain error log entries
 .EXAMPLE
-    ./Get-LogContent -LogPath  "C:\DBADashService\Logs"
+    ./Get-LogContent -LogPath  "C:\DBAHawkService\Logs"
 .EXAMPLE
-    ./Get-LogContent -LogPath  "C:\DBADashService\Logs" -ThrowError
+    ./Get-LogContent -LogPath  "C:\DBAHawkService\Logs" -ThrowError
 #>
 Param(
     [Parameter(Mandatory=$true)]

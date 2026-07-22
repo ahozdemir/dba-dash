@@ -1,15 +1,15 @@
-SET QUOTED_IDENTIFIER ON
+﻿SET QUOTED_IDENTIFIER ON
 SET NOCOUNT ON
 /*********************************************************************
 	
-	DBA Dash Blocking Alert
+	DBA Hawk Blocking Alert
 	
 	This is an example alert that you can configure based on the 
-	data collected by DBA Dash.  Send an alert if blocking exceeds
+	data collected by DBA Hawk.  Send an alert if blocking exceeds
 	a certain wait time and number of blocked sessions.  Based on 
 	running query snapshot.
 	This code should run from a SQL Agent job in the context of 
-	the DBA Dash repository database.  DB mail needs to be configured
+	the DBA Hawk repository database.  DB mail needs to be configured
 	to receive alert notifications.  Run the agent job on a suitable 
 	schedule.
 
@@ -23,7 +23,7 @@ DECLARE @ThresholdMs INT = 60000 /* Threshold in ms that will trigger the alert*
 DECLARE @MinBlockedSessions INT=5 /* Minimum number of blocked sessions required to generate an alert */
 DECLARE @DelayBetweenAlertsMins INT = 10 /* Delay between responses to avoid sending a flood of notifications*/
 DECLARE @recipients VARCHAR(MAX)='your_email_here' /* Recipient email address */
-DECLARE @Subject VARCHAR(255)= 'DBA Dash Blocking Alert' /* Email subject */
+DECLARE @Subject VARCHAR(255)= 'DBA Hawk Blocking Alert' /* Email subject */
 /* Enter a tag name and value to alert for instances matching a specific tag.  Leave NULL to alert for all instances */
 DECLARE @TagName NVARCHAR(50) -- = 'Role' 
 DECLARE @TagValue NVARCHAR(50) -- = 'Production'
@@ -31,7 +31,7 @@ DECLARE @TagValue NVARCHAR(50) -- = 'Production'
 /*********************************************************************/
 
 /*	Create a table in tempdb to track when the alert was last generated.  (Change to use a regular DB if you prefer)
-	Used to implement a delay between alerts.  Can be shared with other DBA Dash alerts using AlertType 
+	Used to implement a delay between alerts.  Can be shared with other DBA Hawk alerts using AlertType 
 */
 DECLARE @AlertType VARCHAR(50)='LockWait'
 IF(OBJECT_ID('tempdb.dbo.DBADash_alerts') IS NULL)
@@ -105,7 +105,7 @@ AND BlockedWaitTime>@ThresholdMs
 IF @@ROWCOUNT>0
 BEGIN
 	DECLARE @Msg NVARCHAR(MAX)
-	SET @Msg = 'DBA Dash Alert:
+	SET @Msg = 'DBA Hawk Alert:
 	Significant blocking detected on the following instances:
 
 	'
